@@ -7,3 +7,12 @@ body {
   font-size: 16px;
   color: #ffffff;
 }
+::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
