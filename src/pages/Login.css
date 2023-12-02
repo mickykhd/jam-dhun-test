@@ -33,8 +33,9 @@ button {
   outline: none;
   border: none;
   width: 25rem;
-  height: 2rem;
+  height: 3rem;
   border-radius: 5px;
+  text-transform: capitalize;
 }
 .login-container > a {
   margin-top: 1rem;

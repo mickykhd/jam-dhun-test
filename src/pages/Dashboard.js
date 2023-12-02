@@ -10,13 +10,14 @@ import {
   Legend,
 } from "recharts";
 import { Button } from "@mui/material";
+import LoadingButton from "@mui/lab/LoadingButton";
 import "./Login.css";
 const customCSS = `
   .recharts-x-axis-tick .recharts-text {
     color: green;
   }
 `;
-const token = sessionStorage.getItem("token");
+// const token = sessionStorage.getItem("token");
 
 const Dashboard = () => {
   const [getData, setGetData] = useState({
@@ -32,7 +33,7 @@ const Dashboard = () => {
     location: "",
   });
   const [change, setChange] = useState(false);
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const data = [
     {
@@ -58,37 +59,48 @@ const Dashboard = () => {
   ];
 
   const handleGet = async () => {
-    const url = " https://stg.dhunjam.in/account/admin/4";
-    const response = await fetch(url);
-    const data = await response.json();
+    try {
+      const url = " https://stg.dhunjam.in/account/admin/4";
+      const response = await fetch(url);
+      const data = await response.json();
 
-    const { charge_customers, amount, name, location } = data.data;
+      const { charge_customers, amount, name, location } = data.data;
 
-    setGetData({
-      charge_customers,
-      amount,
-      name,
-      location,
-    });
+      setGetData({
+        charge_customers,
+        amount,
+        name,
+        location,
+      });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleSave = async () => {
-    const url = "https://stg.dhunjam.in/account/admin/4";
-    const updatedData = {
-      amount: {
-        category_6: getData.amount.category_6,
-      },
-    };
-    const response = await fetch(url, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updatedData),
-    });
-    const data = await response.json();
-    console.log(data);
-    setChange(!change);
+    setLoading(true);
+    try {
+      const url = "https://stg.dhunjam.in/account/admin/4";
+      const updatedData = {
+        amount: {
+          category_6: getData.amount.category_6,
+        },
+      };
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedData),
+      });
+      const data = await response.json();
+      setLoading(false);
+      console.log(data);
+      setChange(!change);
+    } catch (error) {
+      setLoading(false);
+      console.error(error);
+    }
   };
   useEffect(() => {
     handleGet();
@@ -309,56 +321,59 @@ const Dashboard = () => {
         </div>
       </div>
       {/* Chart */}
-      <div
-        style={{
-          width: "800px",
-          height: "400px",
-          marginTop: "3rem",
-          display: "flex",
-          justifyContent: "center",
-        }}
-      >
-        <span style={{ fontSize: "30px" }}>&#x20B9;</span>
-        <BarChart
-          width={600}
-          height={300}
-          data={data}
-          barSize={15}
-          fontSize="12px"
-          fontFamily="Poppins"
+      {getData?.charge_customers && (
+        <div
           style={{
-            fontFamily: "Poppins",
-            fontSize: "14px",
-            color: "white",
+            width: "800px",
+            height: "400px",
+            marginTop: "3rem",
+            display: "flex",
+            justifyContent: "center",
           }}
         >
-          {/* <CartesianGrid strokeDasharray="3 3"   /> */}
-          <XAxis
-            dataKey="name"
-            axisLine={{ stroke: "#FFFFFF" }}
-            tickLine={false}
-            tick={true}
-          />
-          <YAxis
-            tick={false}
-            axisLine={{ stroke: "#FFFFFF" }}
-            tickLine={false}
-          />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "white",
-              color: "black",
+          <span style={{ fontSize: "30px" }}>&#x20B9;</span>
+          <BarChart
+            width={600}
+            height={300}
+            data={data}
+            barSize={20}
+            fontSize="12px"
+            fontFamily="Poppins"
+            style={{
               fontFamily: "Poppins",
               fontSize: "14px",
-
-              borderRadius: "5px",
+              color: "white",
             }}
-          />
+          >
+            {/* <CartesianGrid strokeDasharray="3 3"   /> */}
+            <XAxis
+              dataKey="name"
+              axisLine={{ stroke: "#FFFFFF" }}
+              tickLine={false}
+              tick={true}
+            />
+            <YAxis
+              tick={false}
+              axisLine={{ stroke: "#FFFFFF" }}
+              tickLine={false}
+              tickMargin={0}
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "white",
+                color: "black",
+                fontFamily: "Poppins",
+                fontSize: "14px",
 
-          <Bar dataKey="value" fill="#F0C3F1" />
-        </BarChart>
-      </div>
-      <Button
+                borderRadius: "5px",
+              }}
+            />
+
+            <Bar dataKey="value" fill="#F0C3F1" />
+          </BarChart>
+        </div>
+      )}
+      <LoadingButton
         sx={{
           backgroundColor: "#6741D9",
           color: "white",
@@ -387,7 +402,7 @@ const Dashboard = () => {
         onClick={handleSave}
       >
         Save
-      </Button>
+      </LoadingButton>
     </div>
   );
 };

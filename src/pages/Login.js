@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import {
   TextField,
-  Link,
   Button,
   FormControl,
   InputLabel,
@@ -11,6 +10,7 @@ import {
   Snackbar,
   IconButton,
 } from "@mui/material";
+import LoadingButton from "@mui/lab/LoadingButton";
 import CloseIcon from "@mui/icons-material/Close";
 import "./Login.css";
 import Visibility from "@mui/icons-material/Visibility";
@@ -23,6 +23,7 @@ const Login = () => {
   });
   const [token, setToken] = useState("");
   const [open, setOpen] = React.useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
@@ -47,24 +48,32 @@ const Login = () => {
     });
   };
   const handleUser = async () => {
-    const response = await fetch(URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(user),
-    });
-    const data = await response.json();
-    if (data.status === "200") {
-      setOpen(true);
+    setLoading(true);
+    try {
+      const response = await fetch(URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(user),
+      });
+      const data = await response.json();
+      if (data.status === "200") {
+        setOpen(true);
+      }
+      console.log(data);
+      console.log(data.data.token);
+      setToken(data.data.token);
+      setLoading(false);
+      if (data.data.token) {
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      console.error(error);
     }
-    console.log(data);
-    console.log(data.data.token);
-    setToken(data.data.token);
-    if (data.data.token) {
-      navigate("/dashboard");
-    }
-    sessionStorage.setItem("token", token);
+    setLoading(false);
+
+    // sessionStorage.setItem("token", token);
   };
 
   const action = (
@@ -110,20 +119,16 @@ const Login = () => {
         }}
         id="outlined-basic"
         label="Username"
-        variant="outlined"
         size="small"
         name="username"
         value={user.username}
         onChange={handleChange}
       />
-      <FormControl
-        sx={{ m: 1, width: "25rem" }}
-        size="small"
-        variant="outlined"
-      >
+      <FormControl sx={{ m: 1, width: "25rem" }} size="small">
         <InputLabel
           sx={{ color: "white", fontFamily: "Poppins" }}
           htmlFor="outlined-adornment-password"
+          style={{ color: "white", fontFamily: "Poppins" }}
         >
           Password
         </InputLabel>
@@ -164,18 +169,22 @@ const Login = () => {
         />
       </FormControl>
 
-      <Button
+      <LoadingButton
         sx={{
-          color: "#6741D9",
           fontFamily: "Poppins",
           "&:hover": {
             backgroundColor: "#6741D9",
           },
+          height: "5rem",
+          ".MuiLoadingButton-loadingIndicator": {
+            color: "#FFFFFF",
+          },
         }}
+        loading={loading}
         onClick={handleUser}
       >
         Sign in
-      </Button>
+      </LoadingButton>
       <a href="#">New Registartion ?</a>
       <div>
         <Snackbar
